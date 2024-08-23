@@ -36,7 +36,7 @@ def mostrarArchivo():
         titulos,caracteres=leerHeader()
         print("-----------Columnas----------\n")
         for i in range(0,len(caracteres)):
-            print(titulos[i].ljust(caracteres),end="")
+            print(titulos[i],end="")
         print("")
         print("-----------------------------\n")
         
@@ -44,4 +44,7 @@ def mostrarArchivo():
         # for i in range(0,2):
         #     mostrar=archivo.read(lengthLinea)
         #     print(mostrar + "\n")
-#esta mal 
+#falta que muestre los datos del archivo
+# 
+
+ 
