@@ -6,7 +6,7 @@ lengthLinea=32
 lengthColumna = 20 # tamaño de columna
 
 def generarArchivo():
-    cantColumnas=input("Ingrese la cantidad de columnas")
+    cantColumnas=input("Ingrese la cantidad de columnas: ")
     with open('nombrearchivo.txt','w') as archivo:
         archivo.write(cantColumnas.ljust(lengthColumnas))
         for i in range(int(cantColumnas)):
@@ -31,13 +31,13 @@ def mostrarArchivo():
         print(f"Cantidad de columnas: {archivo.read(lengthColumnas)} \n")
         print(f'Espacio que ocupa el nombre de columna: {lengthNombreColumna}\n')
         print(f'Espacio que ocupa el dato de la columna: {lengthCaracteres}\n')
-        print("-----------------------------\n")
         
         
         titulos,caracteres=leerHeader()
         print("-----------Columnas----------\n")
         for i in range(0,len(caracteres)):
-            print(titulos[i].ljust(caracteres[i]))
+            print(titulos[i].ljust(caracteres),end="")
+        print("")
         print("-----------------------------\n")
         
         # archivo.seek(lengthLinea);
