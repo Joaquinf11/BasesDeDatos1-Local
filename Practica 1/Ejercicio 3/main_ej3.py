@@ -12,7 +12,7 @@ def mostrarMenu():
 
 def main():
     mostrarMenu()
-    accion= input()
+    accion= input("Ingrese una opcion: ")
 
     while(accion != '7'):
         if accion == '1':
