@@ -7,9 +7,10 @@ LENGTH_DATO= LENGTH_APELLIDO + LENGTH_NOMBRE + LENGTH_CODIGO
 
 LENGTH_FILE= 700 * LENGTH_DATO
 HASH=701
+OVERFLOW= HASH * LENGTH_DATO
 
 def hashFunction(codigo):
-    return codigo % 701
+    return codigo % HASH
  
 
 def readByPK(codigo):
@@ -25,6 +26,11 @@ def readByOffset(index):
         codigo = archivo.read(LENGTH_CODIGO).strip()
         return apellido,nombre,codigo
 
+def readOverflow(codigo):
+    with open(PATH_ARCHIVO,'r') as archivo:
+        archivo.seek(OVERFLOW)
+        
+    
 
 def writeByPK(apellido,nombre,codigo):
     datos= readByPK(codigo)
@@ -47,11 +53,22 @@ def insert(new_apellido,new_nombre,new_codigo):
     writeByPK(new_apellido,new_nombre,new_codigo)
 
 def delete (codigo):
-    index= hashFunction(codigo)
-    pos=(index-1)*LENGTH_DATO
+    registro= readByPK(codigo)
+    if registro is not None:
+        pos= (hashFunction(codigo)-1)* LENGTH_DATO
+        with open(PATH_ARCHIVO,"r+b") as archivo:
+            archivo.seek(-LENGTH_DATO,2)
+            ultimo_registro = archivo.read()
+            archivo.seek(pos)
+            archivo.write(ultimo_registro)
+            archivo.seek(-LENGTH_DATO,2)
+            archivo.truncate()
+    else:
+        registro= readOverflow(codigo)
     # IF ESTA EN EL HASH LO BORRO SINO BUSCO EN OVERFLOW
 
-    
+
+
 
     
     
