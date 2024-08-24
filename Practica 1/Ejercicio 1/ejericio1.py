@@ -62,6 +62,7 @@ PATH = "Archivo.txt"
 """si multiplico 36 por la cantidad de datos,obtengo el tamaño del archivo"""
 
 
+
 def readByPK(index):
     pos = offset(index)
     return readByOffset(pos)
@@ -112,7 +113,6 @@ def delete(index):
 
 
 def update(index, new_apellido, new_nombre, new_codigo):
-    pos = offset(index)
     old_apellido,old_nombre,old_codigo = readByPK(index)
     if new_apellido is None:
         new_apellido = old_apellido
