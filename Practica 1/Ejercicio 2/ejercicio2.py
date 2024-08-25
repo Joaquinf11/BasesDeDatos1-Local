@@ -15,7 +15,10 @@ def hashFunction(codigo):
 
 def readByPK(codigo):
     index= hashFunction(codigo)
-    return readByOffset(index)
+    resultado= readByOffset(index)
+    if not resultado:
+        resultado =readOverflow(codigo)
+    return resultado
 
 def readByOffset(index):
     pos=(index-1) * LENGTH_DATO
@@ -26,11 +29,14 @@ def readByOffset(index):
         codigo = archivo.read(LENGTH_CODIGO).strip()
         return apellido,nombre,codigo
 
-def readOverflow(codigo):
+def readOverflow(codigo): 
     with open(PATH_ARCHIVO,'r') as archivo:
         archivo.seek(OVERFLOW)
-        
-    
+        registro= archivo.read(LENGTH_DATO)
+        while (registro[2] != codigo & registro[2] != "".ljust(LENGTH_DATO)):
+            archivo.seek(LENGTH_DATO)
+            registro= archivo.read(LENGTH_DATO)
+    return registro        
 
 def writeByPK(apellido,nombre,codigo):
     datos= readByPK(codigo)
@@ -38,7 +44,7 @@ def writeByPK(apellido,nombre,codigo):
        index= hashFunction(codigo)
        writeByOffset(index,apellido,nombre,codigo)
     else:
-        return # aca iria overflow creo
+        writeOverflow(apellido,nombre,codigo)
     
 def writeByOffset(index,apellido,nombre,codigo):
     pos= (index-1)* LENGTH_DATO
@@ -48,6 +54,12 @@ def writeByOffset(index,apellido,nombre,codigo):
         archivo.write(nombre.ljust(LENGTH_NOMBRE).encode("utf-8"))
         archivo.write(codigo.ljust(LENGTH_CODIGO).encode("utf-8"))
     # tene cuidado con el tema del overflow aca chequealo 
+
+def writeOverflow(apellido,nombre,codigo):
+    with open(PATH_ARCHIVO,'a') as archivo:
+        archivo.write(apellido.ljust(LENGTH_APELLIDO))
+        archivo.write(nombre.ljust(LENGTH_NOMBRE))
+        archivo.write(codigo.ljust(LENGTH_CODIGO))
 
 def insert(new_apellido,new_nombre,new_codigo):
     writeByPK(new_apellido,new_nombre,new_codigo)
@@ -65,6 +77,9 @@ def delete (codigo):
             archivo.truncate()
     else:
         registro= readOverflow(codigo)
+        if registro is not None:
+            
+
     # IF ESTA EN EL HASH LO BORRO SINO BUSCO EN OVERFLOW
 
 
