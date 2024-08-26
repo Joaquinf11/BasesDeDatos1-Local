@@ -5,44 +5,51 @@ LENGTH_NOMBRE = 16
 LENGTH_CODIGO = 4
 LENGTH_DATO= LENGTH_APELLIDO + LENGTH_NOMBRE + LENGTH_CODIGO
 
-LENGTH_FILE= 700 * LENGTH_DATO
 HASH=701
+LENGTH_HASH= HASH * LENGTH_DATO
 OVERFLOW= HASH * LENGTH_DATO
 
 def inicarArchivo():
     with open(PATH_ARCHIVO,'w') as archivo:
-        "".archivo.write(LENGTH_FILE)
+       archivo.write( "".ljust(LENGTH_HASH))
 
 def hashFunction(codigo):
+    codigo= int(codigo)
     return codigo % HASH
  
 
 def readByPK(codigo):
-    index= hashFunction(codigo)
-    return readByOffset(index)
+    pos= (hashFunction(codigo)-1)*LENGTH_DATO
+    registro=readByOffset(pos)
+    if registro is None:
+        registro=readOverflowByPK(codigo)
+    return registro
 
-def readByOffset(index):
-    pos=(index-1) * LENGTH_DATO
+def readByOffset(pos):
     with open(PATH_ARCHIVO,'r') as archivo:
+        puntero= archivo.tell()
         archivo.seek(pos)
-        apellido = archivo.read(LENGTH_APELLIDO).strip() #chequear que hace el strip, puede fallar aca por como lo lees en writebypk
-        nombre = archivo.read(LENGTH_NOMBRE).strip()
-        codigo = archivo.read(LENGTH_CODIGO).strip()
+        puntero= archivo.tell()
+        apellido = archivo.read(LENGTH_APELLIDO)
+        nombre = archivo.read(LENGTH_NOMBRE)
+        codigo = archivo.read(LENGTH_CODIGO)
         return apellido,nombre,codigo
 
 def readOverflowByPK(codigo): 
     pos=offsetOverflow(codigo)
     with open(PATH_ARCHIVO,'r') as archivo:
         archivo.seek(pos)
-        registro= archivo.read(LENGTH_DATO)
-    return registro
+        apellido = archivo.read(LENGTH_APELLIDO) 
+        nombre = archivo.read(LENGTH_NOMBRE)
+        codigo = archivo.read(LENGTH_CODIGO)
+    return apellido,nombre,codigo
         
 def offsetOverflow(codigo):
     pos= OVERFLOW
     with open(PATH_ARCHIVO,'r') as archivo:
         archivo.seek(pos)
         registro= archivo.read(LENGTH_DATO)
-        while (registro[2] != codigo & registro[2] != "".ljust(LENGTH_DATO)):
+        while (registro[2] != codigo and registro[2] != "".ljust(LENGTH_CODIGO)):
             pos+=LENGTH_DATO
             registro= archivo.read(LENGTH_DATO)
     return pos
@@ -50,22 +57,27 @@ def offsetOverflow(codigo):
 def readOverflowByOffset(index):
     pos= OVERFLOW + ((index-1) *LENGTH_DATO)
     with open(PATH_ARCHIVO,'r') as archivo:
+        puntero= archivo.tell()
         archivo.seek(pos)
+        puntero=archivo.tell()
         registro= archivo.read(LENGTH_DATO)
     return registro
 
 
 def writeByPK(apellido,nombre,codigo):
     datos= readByPK(codigo)
-    if (datos == "".ljust(LENGTH_DATO)):
-       index= hashFunction(codigo)
-       writeByOffset(index,apellido,nombre,codigo)
+    if (datos[0] == "".ljust(LENGTH_APELLIDO)):
+        pos= (hashFunction(codigo)-1)*LENGTH_DATO
+        writeByOffset(pos,apellido,nombre,codigo)
+    else:
+        writeOverflow(apellido,nombre,codigo)
 
     
-def writeByOffset(index,apellido,nombre,codigo):
-    pos= (index-1)* LENGTH_DATO
+def writeByOffset(pos,apellido,nombre,codigo):
     with open(PATH_ARCHIVO,'r+b') as archivo:
+        puntero= archivo.tell()
         archivo.seek(pos)
+        puntero= archivo.tell()
         archivo.write(apellido.ljust(LENGTH_APELLIDO).encode("utf-8"))
         archivo.write(nombre.ljust(LENGTH_NOMBRE).encode("utf-8"))
         archivo.write(codigo.ljust(LENGTH_CODIGO).encode("utf-8"))
@@ -78,30 +90,26 @@ def writeOverflow(apellido,nombre,codigo):
 
 
 def insert(new_apellido,new_nombre,new_codigo):
-    registro=readByPK(new_codigo)
-    if registro is None:
-        writeOverflow(new_apellido,new_nombre,new_codigo)
-    else:
         writeByPK(new_apellido,new_nombre,new_codigo)
 
+#no se si sirve primero leer el overflow pero no se me ocurre otra forma ya que el readbypk pasa por el overflow y aca no los puedo diferenciar
 def delete (codigo):
-    registro= readByPK(codigo)
+    registro= readOverflowByPK(codigo)
+    pos=offsetOverflow(codigo)
     with open(PATH_ARCHIVO,"r+b") as archivo:
         if registro is not None:
-            pos= (hashFunction(codigo)-1)* LENGTH_DATO
-            archivo.seek(pos)
-            archivo.write("".ljust(LENGTH_DATO).encode("utf-8"))
-            
-        else:
-            registro= readOverflowByPK(codigo)
-            pos=offsetOverflow(codigo)
-            if registro is not None:
                 archivo.seek(-LENGTH_DATO,2)
                 ultimo_registro = archivo.read()
                 archivo.seek(pos)
                 archivo.write(ultimo_registro)
                 archivo.seek(-LENGTH_DATO,2)
                 archivo.truncate()
+        else:
+            registro=readByPK(codigo)
+            pos= (hashFunction(codigo)-1)* LENGTH_DATO
+            archivo.seek(pos)
+            archivo.write("".ljust(LENGTH_DATO).encode("utf-8"))
+       
                 
 def update(old_codigo,new_apellido,new_nombre,new_codigo):
     old_registro=readByPK(old_codigo)
@@ -115,18 +123,7 @@ def update(old_codigo,new_apellido,new_nombre,new_codigo):
         if new_codigo is None:
             new_codigo = old_registro[2]
         writeByPK(new_apellido,new_nombre,new_codigo)
-    else:
-        old_registro=readOverflowByPK(old_codigo)
-        if old_registro is not None:
-            if new_apellido is None:
-                new_apellido = old_registro[0]
-
-            if new_nombre is None:
-                new_nombre = old_registro[1]
-
-            if new_codigo is None:
-                new_codigo = old_registro[2] 
-            writeOverflow(new_apellido,new_nombre,new_codigo)   
+    
 
 def mostrarArchivo():
     index = 1
