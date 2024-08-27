@@ -21,15 +21,13 @@ def hashFunction(codigo):
 def readByPK(codigo):
     pos= (hashFunction(codigo)-1)*LENGTH_DATO
     registro=readByOffset(pos)
-    if registro is None:
+    if registro.isspace() or registro[2] != codigo:
         registro=readOverflowByPK(codigo)
     return registro
 
 def readByOffset(pos):
     with open(PATH_ARCHIVO,'r') as archivo:
-        puntero= archivo.tell()
         archivo.seek(pos)
-        puntero= archivo.tell()
         apellido = archivo.read(LENGTH_APELLIDO)
         nombre = archivo.read(LENGTH_NOMBRE)
         codigo = archivo.read(LENGTH_CODIGO)
@@ -54,14 +52,13 @@ def offsetOverflow(codigo):
             registro= archivo.read(LENGTH_DATO)
     return pos
 
-def readOverflowByOffset(index):
-    pos= OVERFLOW + ((index-1) *LENGTH_DATO)
+def readOverflowByOffset(pos):
     with open(PATH_ARCHIVO,'r') as archivo:
-        puntero= archivo.tell()
         archivo.seek(pos)
-        puntero=archivo.tell()
-        registro= archivo.read(LENGTH_DATO)
-    return registro
+        apellido = archivo.read(LENGTH_APELLIDO)
+        nombre = archivo.read(LENGTH_NOMBRE)
+        codigo = archivo.read(LENGTH_CODIGO)
+    return apellido,nombre,codigo
 
 
 def writeByPK(apellido,nombre,codigo):
@@ -75,9 +72,7 @@ def writeByPK(apellido,nombre,codigo):
     
 def writeByOffset(pos,apellido,nombre,codigo):
     with open(PATH_ARCHIVO,'r+b') as archivo:
-        puntero= archivo.tell()
         archivo.seek(pos)
-        puntero= archivo.tell()
         archivo.write(apellido.ljust(LENGTH_APELLIDO).encode("utf-8"))
         archivo.write(nombre.ljust(LENGTH_NOMBRE).encode("utf-8"))
         archivo.write(codigo.ljust(LENGTH_CODIGO).encode("utf-8"))
@@ -90,7 +85,7 @@ def writeOverflow(apellido,nombre,codigo):
 
 
 def insert(new_apellido,new_nombre,new_codigo):
-        writeByPK(new_apellido,new_nombre,new_codigo)
+    writeByPK(new_apellido,new_nombre,new_codigo)
 
 #no se si sirve primero leer el overflow pero no se me ocurre otra forma ya que el readbypk pasa por el overflow y aca no los puedo diferenciar
 def delete (codigo):
