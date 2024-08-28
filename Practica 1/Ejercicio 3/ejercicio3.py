@@ -2,7 +2,7 @@ LENGTH_CANT_COLUMNAS = 2
 LENGTH_NOMBRE_COLUMNA = 16
 LENGTH_CARACTERES = 4
 
-LENNGTH_LINEA=32
+
 LENGTH_COLUMNA = 20 # tamaño de columna, CHEUQEAR creo que se calculaba con alguna de las constantes anteriores.
                     # creo que seria length nombre columna + length caracteres
 
@@ -14,7 +14,11 @@ def generarArchivo():
         for i in range(int(cantColumnas)):
             archivo.write(input(f"inserte el titulo de la columna numero {i}: ").ljust(LENGTH_NOMBRE_COLUMNA))
             archivo.write(input(f"inserte la cantidad de caracteres utilizados por dato en la columna numero {i}: ").ljust(LENGTH_CARACTERES))
-       
+
+def offsetHeader():
+    titulos,caracteres= readHeader()        #Calculo el tamano con la cantidad de columas
+    return  LENGTH_CANT_COLUMNAS + (len(caracteres) * LENGTH_COLUMNA)  # puede fallar dijo tusam revisar
+
 
 def readHeader():
     titulos=[]
@@ -26,7 +30,20 @@ def readHeader():
             caracteres.append(int(archivo.read(LENGTH_CARACTERES)))
     return titulos,caracteres
 
-def readByPK():
+def getOffset(index):
+    titulos,caracteres=readHeader()
+    pos= offsetHeader()
+
+
+def readByPK(index):
+    pos=  getOffset(index) + offsetHeader()
+    return readByOfsset(pos)
+
+def readByOffset(pos):
+    with open('nombrearchivo.txt','r') as archivo:
+        archivo.seek(pos)
+
+    
     
 
 def mostrarArchivo():
