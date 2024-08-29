@@ -35,6 +35,14 @@ def main():
                 print("Alta generada exitosamente.")
             except Exception as e:
                 print(f"Error al dar de alta: {e}")
+        elif accion == '5':
+            try:
+                index=input("Ingrese el indice que desea eliminar: ")
+                ejercicio3.delete(index)
+                print("Registro eliminado exitosamente.")
+            except Exception as e:
+                print(f"Error al dar de baja: {e}")
+        
         mostrarMenu()
         accion=input("Ingrese una opcion:")
 
