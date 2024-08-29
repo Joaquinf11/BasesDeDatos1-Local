@@ -68,7 +68,7 @@ def readByOffset(pos):
             data[i].append(archivo.read(LENGTH_CARACTERES))
     return columnas,data
 
-def writeByPk(index,datos):
+def writeByPK(index,datos):
     if index is not None:
         pos = getOffset(index)
     else:
@@ -88,7 +88,7 @@ def writeByOffset(pos,datos):
     
 
 def insert(index,datos):
-    writeByPk(index,datos)
+    writeByPK(index,datos)
 
 def delete(index):
     pos=getOffset(index)
@@ -100,6 +100,10 @@ def delete(index):
         archivo.write(ultimo_registro)
         archivo.seek(-size_data,2)
         archivo.truncate()
+
+def update(index,new_datos):
+    #old_datos = readByPK(index). FALTARIA preguntar si alguno de los datos nuevos es none para reemplazarlo por el old correspondiente
+    writeByPK(index,new_datos)
 
 def mostrarArchivo():
     print("---------------------------Info Header---------------------------\n")

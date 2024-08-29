@@ -35,6 +35,15 @@ def main():
                 print("Alta generada exitosamente.")
             except Exception as e:
                 print(f"Error al dar de alta: {e}")
+        elif accion == '4':
+            try:
+                index=input("Ingrese el indice que desea modificar: ")
+                print("Ingrese los datos")
+                datos= ejercicio3.ingresarDatos()
+                ejercicio3.update(index, datos)
+                print("Modificacion generada exitosamente.")
+            except Exception as e:
+                print(f"Error al realizar modificacion: {e}")
         elif accion == '5':
             try:
                 index=input("Ingrese el indice que desea eliminar: ")
