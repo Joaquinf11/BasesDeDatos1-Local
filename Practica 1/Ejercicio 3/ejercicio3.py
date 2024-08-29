@@ -51,16 +51,14 @@ def readByPK(index):
     pos= getOffset(index)
     return readByOffset(pos)
 
-def readByOffset(pos):  #esta mal aca tenes que leeer una linea entera, fijate bien 
-    columnas=[]
-    data=[]
+def readByOffset(pos):
+    titulos,caracteres=readHeader()
+    datos=[]
     with open(PATH_ARCHIVO,'r') as archivo:
-        cantColumnas= int(archivo.read(LENGTH_CANT_COLUMNAS))
         archivo.seek(pos)
-        for i in range(0,cantColumnas):
-            columnas[i].append(archivo.read(LENGTH_COLUMNA))
-            data[i].append(archivo.read(LENGTH_CARACTERES))
-    return columnas,data
+        for i in range(0,len(caracteres)):
+            datos.append(archivo.read(caracteres[i]))
+    return datos
 
 def writeByPK(index,datos):
     if index is not None:
@@ -112,27 +110,18 @@ def mostrarArchivo():
         for i in range(0,len(caracteres)):
             print(f"Columna {i}: {titulos[i].strip()}  || Longitud: {caracteres[i]}") 
         print("----------------------------------------------------------------------\n")
-        print("\n")
+
         
         index=1
         while True:
             datos=readByPK(index)
             if datos[0] == "":
                 break
-            print("-----------------------------\n")
+            print("-----------------------------")
             for i in range(0,len(datos)):
-                    print(f"{titulos[i]}: {datos[i]}")
+                    print(f"{titulos[i].strip()}: {datos[i]}")
             index+=1
-            
-    
-
-
-        # archivo.seek(LENNGTH_LINEA);
-        # for i in range(0,2):
-        #     mostrar=archivo.read(LENNGTH_LINEA)
-        #     print(mostrar + "\n")
-#falta que muestre los datos del archivo
-# 
+        print("-----------------------------\n")
 
 def ingresarDatos():
     titulos,caracteres= readHeader()

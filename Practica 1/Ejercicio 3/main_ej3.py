@@ -1,14 +1,13 @@
 import ejercicio3
 
 def mostrarMenu():
-    print("ABM de Archivo de Metadata\n")
+    print("\n ABM de Archivo de Metadata \n")
     print("0- Salir\n" +
           "1 - Generar archivo nuevo \n" +
           "2 - Mostrar archivo\n" +
           "3 - Alta\n" + 
           "4 - Modificacion\n" +
-          "5 - Baja\n" + 
-          "6 - Compactar \n"
+          "5 - Baja\n"
           )
 
 def main():
