@@ -15,9 +15,11 @@ def generarArchivo():
             archivo.write(input(f"inserte el titulo de la columna numero {i}: ").ljust(LENGTH_NOMBRE_COLUMNA))
             archivo.write(input(f"inserte la cantidad de caracteres utilizados por dato en la columna numero {i}: ").ljust(LENGTH_CARACTERES))
 
-def offsetHeader():
-    titulos,caracteres= readHeader()        #Calculo el tamano con la cantidad de columas
-    return  LENGTH_CANT_COLUMNAS + (len(caracteres) * LENGTH_COLUMNA)  # puede fallar dijo tusam revisar
+def lengthHeader():
+    with open('nombrearchivo.txt','r') as archivo:
+        cantColumnas=archivo.read(LENGTH_CANT_COLUMNAS)
+    size_header= LENGTH_CANT_COLUMNAS + (LENGTH_COLUMNA * cantColumnas)
+    return size_header
 
 
 def readHeader():
@@ -30,20 +32,33 @@ def readHeader():
             caracteres.append(int(archivo.read(LENGTH_CARACTERES)))
     return titulos,caracteres
 
-def getOffset(index):
-    titulos,caracteres=readHeader()
-    pos= offsetHeader()
+def lenghData():
+    size_data=0
+    with open('nombrearchivo.txt','r') as archivo:
+        cantColumnas=int(archivo.read(LENGTH_CANT_COLUMNAS))
+        for i in range(0,cantColumnas):
+            longitud=(int (archivo.read(LENGTH_CARACTERES)))
+            size_data+= longitud
+    return size_data    
+
 
 
 def readByPK(index):
-    pos=  getOffset(index) + offsetHeader()
-    return readByOfsset(pos)
+    pos= lengthHeader() + (lenghData * (index-1))
+    return readByOffset(pos)
 
 def readByOffset(pos):
+    columnas=[]
+    data=[]
     with open('nombrearchivo.txt','r') as archivo:
+        cantColumnas= int(archivo.read(LENGTH_CANT_COLUMNAS))
         archivo.seek(pos)
+        for i in range(0,cantColumnas):
+            columnas[i].append(archivo.read(LENGTH_COLUMNA))
+            data[i].append(archivo.read(LENGTH_CARACTERES))
+    return columnas,data
 
-    
+
     
 
 def mostrarArchivo():
