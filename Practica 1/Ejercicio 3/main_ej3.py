@@ -23,10 +23,10 @@ def main():
             except Exception as e:
                 print(f"Error al generar archivo: {e}")
         elif accion == '2':
-            try:
+           # try:
                 ejercicio3.mostrarArchivo()
-            except Exception as e:
-                print(f"Error al mostrar archivo: {e}")
+            # except Exception as e:
+            #     print(f"Error al mostrar archivo: {e}")
         elif accion == '3':
             try:
                 print("Ingrese los datos")
