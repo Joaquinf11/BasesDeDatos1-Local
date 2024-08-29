@@ -2,19 +2,20 @@ import ejercicio3
 
 def mostrarMenu():
     print("ABM de Archivo de Metadata\n")
-    print("1 - Generar archivo nuevo \n" +
+    print("0- Salir\n" +
+          "1 - Generar archivo nuevo \n" +
           "2 - Mostrar archivo\n" +
           "3 - Alta\n" + 
           "4 - Modificacion\n" +
           "5 - Baja\n" + 
-          "6 - Compactar \n" +
-          "7 - Salir\n")
+          "6 - Compactar \n"
+          )
 
 def main():
     mostrarMenu()
     accion= input("Ingrese una opcion: ")
 
-    while(accion != '7'):
+    while(accion != '0'):
         if accion == '1':
             try:
                 ejercicio3.generarArchivo()
@@ -28,11 +29,13 @@ def main():
                 print(f"Error al mostrar archivo: {e}")
         elif accion == '3':
             try:
-                ejercicio3.alta()
+                print("Ingrese los datos")
+                datos= ejercicio3.ingresarDatos()
+                ejercicio3.insert(None, datos)
                 print("Alta generada exitosamente.")
             except Exception as e:
                 print(f"Error al dar de alta: {e}")
         mostrarMenu()
-        accion=input()
+        accion=input("Ingrese una opcion:")
 
 main()
