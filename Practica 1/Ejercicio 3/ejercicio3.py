@@ -14,6 +14,11 @@ CARACTERES=1
 PATH_ARCHIVO= 'nombrearchivo.txt'
 
 class Metadata:
+    cantidad_columnas= None
+    titulos= None
+    caracteres=None
+    size_data= None
+    size_head=None
     def __init__(self):
         self.cantidad_columnas= 1
         self.titulos= ["Estado".ljust(LENGTH_NOMBRE_COLUMNA)]
