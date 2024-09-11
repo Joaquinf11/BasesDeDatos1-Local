@@ -5,13 +5,11 @@ LENGTH_CARACTERES = 4
 LENGTH_COLUMNA = LENGTH_NOMBRE_COLUMNA + LENGTH_CARACTERES  # tamaño de columna
 
 PADDING=" "
-ESTADO_LONGITUD=1
-ESTADO_ACTIVA="A"
-ESTADO_BAJA="B"
-TITULOS=0
-CARACTERES=1
 
-PATH_ARCHIVO=' '
+
+
+
+PATH_ARCHIVO= 'nombrearchivo.txt'
 
 class Metadata:
     cantidad_columnas= None
@@ -20,16 +18,15 @@ class Metadata:
     size_data= None
     size_head=None
     def __init__(self):
-        self.cantidad_columnas= 1
-        self.titulos= ["Estado".ljust(LENGTH_NOMBRE_COLUMNA)]
-        self.caracteres=[ESTADO_LONGITUD]
-        self.size_data= ESTADO_LONGITUD #HAY QUE INICIARLO CON ESTADO_LONGITUD
+        self.cantidad_columnas= 0
+        self.titulos= []
+        self.caracteres=[]
+        self.size_data= 0 #HAY QUE INICIARLO CON ESTADO_LONGITUD
         self.size_head=0
 
 METADATA = Metadata()
 
 def generarArchivo():
-    PATH_ARCHIVO= input("Ingrese el nombre del archivo: ") + '.txt'
     cantidad_columnas=input("Ingrese la cantidad de columnas: ")
     with open(PATH_ARCHIVO,'w') as archivo:
         archivo.write(cantidad_columnas.ljust(LENGTH_CANT_COLUMNAS,PADDING))
@@ -40,7 +37,7 @@ def generarArchivo():
 def readHead(): 
     with open(PATH_ARCHIVO,'r') as archivo:
         cantidad_columnas=int(archivo.read(LENGTH_CANT_COLUMNAS))
-        METADATA.cantidad_columnas=cantidad_columnas + 1 # mas uno por agregar ESTADO
+        METADATA.cantidad_columnas=cantidad_columnas  
         METADATA.size_head= LENGTH_CANT_COLUMNAS + (LENGTH_COLUMNA * (int(cantidad_columnas)))
         for i in range(0,cantidad_columnas):
             METADATA.titulos.append(archivo.read(LENGTH_NOMBRE_COLUMNA))
@@ -79,9 +76,8 @@ def writeByOffset(pos,datos):
             archivo.seek(0,2)
         else:
             archivo.seek(pos)
-        archivo.write(ESTADO_ACTIVA.encode("utf-8"))
-        for i in range(0, METADATA.cantidad_columnas-1):
-            archivo.write(datos[i].ljust(METADATA.caracteres[i+1],PADDING).encode("utf-8"))
+        for i in range(0, METADATA.cantidad_columnas):
+            archivo.write(datos[i].ljust(METADATA.caracteres[i],PADDING).encode("utf-8"))
     
 
 def insert(index,datos):
@@ -91,7 +87,7 @@ def delete(index):
     pos=getOffset(index)
     with open(PATH_ARCHIVO,'r+') as archivo:
        archivo.seek(pos)
-       archivo.write(ESTADO_BAJA)
+
 
 
 def update(index,new_datos):
