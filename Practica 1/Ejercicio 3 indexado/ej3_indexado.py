@@ -1,15 +1,12 @@
 LENGTH_CANT_COLUMNAS = 2
 LENGTH_NOMBRE_COLUMNA = 16
 LENGTH_CARACTERES = 4
-
 LENGTH_COLUMNA = LENGTH_NOMBRE_COLUMNA + LENGTH_CARACTERES  # tamaño de columna
+
 
 PADDING=" "
 
-
-
-
-PATH_ARCHIVO= 'nombrearchivo.txt'
+PATH_ARCHIVO=''
 
 class Metadata:
     cantidad_columnas= None
@@ -26,8 +23,10 @@ class Metadata:
 
 METADATA = Metadata()
 
+ 
 def generarArchivo():
     cantidad_columnas=input("Ingrese la cantidad de columnas: ")
+    PATH_ARCHIVO=input("Ingrese el nombre del archivo ")
     with open(PATH_ARCHIVO,'w') as archivo:
         archivo.write(cantidad_columnas.ljust(LENGTH_CANT_COLUMNAS,PADDING))
         for i in range(int(cantidad_columnas)):
