@@ -3,8 +3,17 @@ TAMANIOAPELLIDO = 16
 TAMANIONOMBRE = 16
 TAMANIOCODIGO = 4
 TAMANIODATO= TAMANIOCODIGO + TAMANIOAPELLIDO + TAMANIONOMBRE
-PATH = "archivo.txt"
+PATH = ''
 
+def nombreArchivo(nombre):
+    global PATH
+    PATH= nombre + '.txt'
+
+def generarArchivo(nombre):
+    nombreArchivo(nombre)
+    with open(PATH,"w"):
+        pass
+   
 def readByPK(index):
     pos = offset(index)
     return readByOffset(pos)
@@ -25,7 +34,7 @@ def writeByPK(index,apellido,nombre,codigo):
     writeByOffset(pos,apellido,nombre,codigo)
 
 def writeByOffset(pos,apellido,nombre,codigo):
-    with open(PATH,"r+b") as archivo:
+    with open(PATH,'r+b') as archivo:
         if pos is None:
             archivo.seek(0,2)
         else:

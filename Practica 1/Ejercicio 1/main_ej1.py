@@ -9,10 +9,26 @@ def mostrarMenu():
           "4 - Baja\n")
 
 def main():
-    mostrarMenu()
+    print("0- Salir\n" +
+        "1 - Generar archivo nuevo \n" +
+        "2 - Manipular archivo existente\n")
+    
+    accion=input("Elija una opcion:"  )
+    if accion == '0':
+        return
+    if accion == '1':
+        nombre=input("Ingrese el nombre del archivo: ")
+        ejericio1.generarArchivo(nombre)
+        mostrarMenu()
+    if accion == '2':
+        nombre=input("Ingrese el nombre del archivo: ")
+        ejericio1.nombreArchivo(nombre)
+        mostrarMenu()
     accion= input("Ingrese una opcion: ")
     while(accion.upper != '0'):
-        if accion.upper() == '2':
+        if accion == '1':
+            ejericio1.mostrarArchivo()
+        elif accion.upper() == '2':
             nombre=input("Ingrese el nombre: ")
             apellido=input("Ingrese el apellido: ")
             codigo =input("Ingrese codigo: ")
@@ -21,16 +37,14 @@ def main():
             indice=int(input('Ingrese el indice que desea eliminar: '))
             ejericio1.delete(indice)
         elif accion.upper() == '3':
-            indice=int(input('Ingrese el indice que desea eliminar: '))
+            indice=int(input('Ingrese el indice que desea modificar: '))
             nombre=input("Ingrese el nombre: ")
             apellido=input("Ingrese el apellido: ")
             codigo =input("Ingrese codigo: ")
             ejericio1.update(indice,apellido,nombre,codigo)
-        elif accion.upper == '1':
-            ejericio1.mostrarArchivo()
+    
         else:
             print("Opción no válida.")
-            break;
         mostrarMenu()
         accion= input("Ingrese una opcion: ")
 
