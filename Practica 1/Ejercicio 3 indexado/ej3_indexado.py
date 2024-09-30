@@ -1,37 +1,55 @@
+import os.path
+import math
+
 LENGTH_CANT_COLUMNAS = 2
 LENGTH_NOMBRE_COLUMNA = 16
 LENGTH_CARACTERES = 4
 LENGTH_COLUMNA = LENGTH_NOMBRE_COLUMNA + LENGTH_CARACTERES  # tamaño de columna
 
+LENGTH_PUNTERO= 4
 
 PADDING=" "
 
 PATH_ARCHIVO=''
 
 class Metadata:
-    cantidad_columnas= None
-    titulos= None
-    caracteres=None
-    size_data= None
-    size_head=None
+    cantidad_columnas : int
+    titulos= []
+    caracteres= []
+    size_data : int
+    size_head : int
+    size_index :int
+    size_pk :int
+
     def __init__(self):
         self.cantidad_columnas= 0
         self.titulos= []
         self.caracteres=[]
-        self.size_data= 0 #HAY QUE INICIARLO CON ESTADO_LONGITUD
+        self.size_data= 0 
         self.size_head=0
 
 METADATA = Metadata()
 
+class Index:
+    pk =None
+    puntero : int
+
+    def __init__(self,pk,puntero):
+        self.pk=pk
+        self.puntero=puntero
  
 def generarArchivo():
-    cantidad_columnas=input("Ingrese la cantidad de columnas: ")
     PATH_ARCHIVO=input("Ingrese el nombre del archivo ")
+    cantidad_columnas=input("Ingrese la cantidad de columnas: ")
     with open(PATH_ARCHIVO,'w') as archivo:
         archivo.write(cantidad_columnas.ljust(LENGTH_CANT_COLUMNAS,PADDING))
         for i in range(int(cantidad_columnas)):
             archivo.write(input(f"inserte el titulo de la columna numero {i}: ").ljust(LENGTH_NOMBRE_COLUMNA,PADDING))
-            archivo.write(input(f"inserte la cantidad de caracteres utilizados por dato en la columna numero {i}: ").ljust(LENGTH_CARACTERES,PADDING))
+            caracteres=input(f"inserte la cantidad de caracteres utilizados por dato en la columna numero {i}: ")
+            if i== 0:
+                METADATA.size_index= caracteres + LENGTH_PUNTERO
+                METADATA.size_pk=caracteres
+            archivo.write(caracteres.ljust(LENGTH_CARACTERES,PADDING))
 
 def readHead(): 
     with open(PATH_ARCHIVO,'r') as archivo:
@@ -44,13 +62,38 @@ def readHead():
             METADATA.caracteres.append(caracteres)
             METADATA.size_data +=  caracteres
 
-def getOffset(index):
-    pos= METADATA.size_head + (METADATA.size_data * ((int(index))-1))
-    return pos
+def readIndex(pos):
+    with open(PATH_ARCHIVO,'r') as archivo:
+        archivo.seek(pos)
+        pk=archivo.read(METADATA.size_pk)
+        puntero= archivo.read(LENGTH_PUNTERO)
+        return Index(pk,puntero)
 
+def getOffset(pk):
+    eOF = os.path.getsize(PATH_ARCHIVO)
+    inferior = METADATA.size_head
+    superior= eOF
+    cantidad_registros = (superior - inferior) / (METADATA.size_data + METADATA.size_index)
+    actual = math.floor(cantidad_registros / 2) * (METADATA.size_data + METADATA.size_index) + METADATA.size_head
+    index = readIndex(actual) # indice del dato del medio
 
-def readByPK(index):
-    pos= getOffset(index)
+    while index.pk != pk:
+        if pk < index.pk:
+            superior = actual
+        else:
+            inferior = actual + METADATA.size_data + METADATA.size_index
+
+        cantidad_registros = (superior - inferior) / (METADATA.size_data + METADATA.size_index)
+
+        if cantidad_registros == 0:
+            return  None
+
+        actual = math.floor(cantidad_registros / 2) * (METADATA.size_data + METADATA.size_index) + inferior
+        index = readIndex(actual)
+    return int(index.puntero)
+
+def readByPK(pk):
+    pos= getOffset(pk)
     return readByOffset(pos)
 
 def readByOffset(pos):
@@ -61,15 +104,31 @@ def readByOffset(pos):
             datos.append(archivo.read(METADATA.caracteres[i]))
     return datos
 
-def writeByPK(index,datos):
-    if index is not None:
-        pos = getOffset(index)
+def writeByPK(pk,datos):
+    if pk is not None:
+        pos = getOffset(pk)
     else:
         pos = None
     writeByOffset(pos,datos)
-    
+
+def updateIndex():
+    pos= METADATA.size_head
+    index_ant=readIndex(pos)
+    index = None
+    with open (PATH_ARCHIVO,'r+'):
+        if index == None:
+            archivo.seek(pos + METADATA.size_data + )
+
+def writeNewIndex(pk,puntero):
+    with open(PATH_ARCHIVO,'a')as archivo:
+        archivo.write(pk.ljust(METADATA.size_pk,PADDING))
+        archivo.write(puntero.ljust(LENGTH_PUNTERO,PADDING))
+    updateIndex()
 
 def writeByOffset(pos,datos):
+    if pos is None:
+        pos= os.path.getsize(PATH_ARCHIVO)
+        writeNewIndex(datos[0],pos)
     with open(PATH_ARCHIVO,'r+b') as archivo:
         if pos is None:
             archivo.seek(0,2)
