@@ -114,10 +114,15 @@ def writeByPK(pk,datos):
 def updateIndex():
     pos= METADATA.size_head
     index_ant=readIndex(pos)
-    index = None
+    index = readIndex(pos + METADATA.size_index + METADATA.size_data)
+    resultado = []
     with open (PATH_ARCHIVO,'r+'):
-        if index == None:
-            archivo.seek(pos + METADATA.size_data + )
+        if index_ant.pk < index.pk:
+            resultado.append(index_ant)
+            index_ant=index
+        elif index_ant > index:
+            
+            
 
 def writeNewIndex(pk,puntero):
     with open(PATH_ARCHIVO,'a')as archivo:
