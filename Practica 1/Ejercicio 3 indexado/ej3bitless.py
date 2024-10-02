@@ -3,6 +3,7 @@ import os.path
 from math import trunc
 from os import system
 
+global PATH
 PATH = ''
 LENGTH_CANT_COLUMNAS = 2
 LENGTH_TITULO = 16
@@ -10,6 +11,8 @@ LENGTH_CARACTERES = 4
 LENGTH_COLUMNA = LENGTH_TITULO + LENGTH_CARACTERES
 LENGTH_PUTNERO = 4
 PADDING = " "
+global METADATA
+METADATA= None
 
 class Metadata:
     cantidadColumnas : int
@@ -20,19 +23,12 @@ class Metadata:
     lenghtIndexEntry : int
 
     def __init__(self):
-        file = open(PATH, "r")
-        self.cantidadColumnas = int(file.read(LENGTH_CANT_COLUMNAS))
-        for i in range(self.cantidadColumnas):
-            self.titulos.append(file.read(LENGTH_TITULO))
-            self.caracteres.append(int(file.read(LENGTH_CARACTERES)))
-        self.lenghtIndexEntry = self.caracteres_pk() + LENGTH_PUTNERO
-        self.root_index = LENGTH_CANT_COLUMNAS + (LENGTH_COLUMNA * self.cantidadColumnas)  # salto el header
-        file.close()
-
-        resultado = 0
-        for i in range(self.cantidadColumnas):
-            resultado += self.caracteres[i]
-        self.lenghtDato = resultado
+        cantidadColumnas = 0
+        titulos = []
+        caracteres = []
+        lenghtDato = 0
+        root_index = 0
+        lenghtIndexEntry = 0
 
     def caracteres_pk(self):
         if self.caracteres is None or len(self.caracteres) == 0:
@@ -46,7 +42,7 @@ class Metadata:
 
         return self.titulos[0]
 
-METADATA = Metadata()
+
 
 class IndexEntry:
     pk = None
@@ -88,9 +84,47 @@ class Dato:
             return None
 
         return self.datos[0]
+    
+def ingresarNombreArchivo():
+    global PATH
+    PATH= input("Ingrese el nombre del archivo: ") + ".txt"
+   
+def ingresarDatos(pk = None):
+    dato = Dato()
+    j = 0
+    if pk is not None:
+        j = 1
+        dato.datos.append(pk.ljust(METADATA.caracteres_pk(),PADDING))
+    for i in range(j,METADATA.cantidadColumnas):
+        dato.datos.append(input(f"{METADATA.titulos[i].strip()}: ").ljust(METADATA.caracteres[i],PADDING))
+    return dato
 
+def generarArchivo():
+    cantidad_columnas = input("numero de columnas: ")
+    with open(PATH,"wt") as archivo:
+        archivo.write(cantidad_columnas.ljust(LENGTH_CANT_COLUMNAS,PADDING))
+        for i in range(int(cantidad_columnas)):
+            archivo.write(input(f"inserte el titulo de la columna numero {i + 1}: ").ljust(LENGTH_TITULO,PADDING))
+            archivo.write(input(f"inserte la cantidad de caracteres utilizados por dato en la columna numero {i + 1}: ").ljust(LENGTH_CARACTERES,PADDING))
+    readHead()
+    
+def readHead():
+    global METADATA
+    METADATA = Metadata()
+    file = open(PATH, "r")
+    METADATA.cantidadColumnas = int(file.read(LENGTH_CANT_COLUMNAS))
+    for i in range(METADATA.cantidadColumnas):
+        METADATA.titulos.append(file.read(LENGTH_TITULO))
+        METADATA.caracteres.append(int(file.read(LENGTH_CARACTERES)))
+    METADATA.lenghtIndexEntry = METADATA.caracteres_pk() + LENGTH_PUTNERO
+    METADATA.root_index = LENGTH_CANT_COLUMNAS + (LENGTH_COLUMNA * METADATA.cantidadColumnas)  # salto el header
+    file.close()
 
-
+    resultado = 0
+    for i in range(METADATA.cantidadColumnas):
+        resultado += METADATA.caracteres[i]
+    METADATA.lenghtDato = resultado
+    
 def getOffset(pk):
     eOF = os.path.getsize(PATH)
     header = METADATA.cantidadColumnas + METADATA.cantidadColumnas * LENGTH_COLUMNA
@@ -134,23 +168,10 @@ def readIndex(offset):
 def readByPK(pk):
     return readByOffset(getOffset(pk))
 
-
 def write(dato):
     with open(PATH,"at") as archivo:
         for i in range (METADATA.cantidadColumnas):
             archivo.write(dato.datos[i].ljust(METADATA.caracteres[i],PADDING))
-
-def update(pk):
-    dato = ingresarDatos(pk)
-    offset = getOffset(dato.pk())
-    with open(PATH,"r+b") as archivo:
-        archivo.seek(offset)
-
-        archivo.seek(METADATA.caracteres_pk(),1)
-
-        for i in range (1,METADATA.cantidadColumnas):
-            archivo.write(dato.datos[i].ljust(METADATA.caracteres[i],PADDING).encode("utf-8"))
-
 
 def updateIndex(newIndex):
     posicion = METADATA.root_index
@@ -159,8 +180,18 @@ def updateIndex(newIndex):
         newIndex[i].write()
         posicion += METADATA.lenghtIndexEntry + METADATA.lenghtDato
 
+def update(pk,dato):
+    offset = getOffset(pk)
+    with open(PATH,"r+b") as archivo:
+        archivo.seek(offset)
+
+        archivo.seek(METADATA.caracteres_pk(),1)
+
+        for i in range (1,METADATA.cantidadColumnas):
+            archivo.write(dato.datos[i].ljust(METADATA.caracteres[i],PADDING).encode("utf-8"))
 
 def delete(pk):
+    pk= pk.ljust(METADATA.caracteres_pk(),PADDING)
     puntero = getOffset(pk)
     eOF = os.path.getsize(PATH)
 
@@ -194,38 +225,7 @@ def delete(pk):
 
     updateIndex(newIndex)
 
-def mostrarArchivo():
-    for i in range(METADATA.cantidadColumnas):
-        print(METADATA.titulos[i].ljust(METADATA.caracteres[i] if METADATA.caracteres[i] > LENGTH_TITULO else LENGTH_TITULO,PADDING),end="")
-    print("")
-    index = readIndex(METADATA.root_index)
-
-    if index.pk != "":
-        dato = index.readDato()
-        for i in range(METADATA.cantidadColumnas):
-            print(dato.datos[i].ljust(METADATA.caracteres[i] if METADATA.caracteres[i] > LENGTH_TITULO else LENGTH_TITULO,PADDING),end="")
-        print("")
-        while index.hasNext():
-            index = index.next()
-            dato = index.readDato()
-            for i in range(0,METADATA.cantidadColumnas):
-                print(dato.datos[i].ljust(METADATA.caracteres[i] if METADATA.caracteres[i] > LENGTH_TITULO else LENGTH_TITULO,PADDING),end="")
-            print("")
-
-def ingresarDatos(pk = None):
-    dato = Dato()
-    j = 0
-    if pk is not None:
-        j = 1
-        dato.datos.append(pk.ljust(METADATA.caracteres_pk(),PADDING))
-    for i in range(j,METADATA.cantidadColumnas):
-        dato.datos.append(input(f"{METADATA.titulos[i].strip()}: ").ljust(METADATA.caracteres[i],PADDING))
-    return dato
-
-
-
-
-def alta():
+def alta(dato):
     eOF = os.path.getsize(PATH)
     new_index = IndexEntry(dato.pk(), eOF + METADATA.lenghtIndexEntry)
 
@@ -263,6 +263,23 @@ def alta():
 
 
 
+def mostrarArchivo():
+    for i in range(METADATA.cantidadColumnas):
+        print(METADATA.titulos[i].ljust(METADATA.caracteres[i] if METADATA.caracteres[i] > LENGTH_TITULO else LENGTH_TITULO,PADDING),end="")
+    print("")
+    index = readIndex(METADATA.root_index)
+
+    if index.pk != "":
+        dato = index.readDato()
+        for i in range(METADATA.cantidadColumnas):
+            print(dato.datos[i].ljust(METADATA.caracteres[i] if METADATA.caracteres[i] > LENGTH_TITULO else LENGTH_TITULO,PADDING),end="")
+        print("")
+        while index.hasNext():
+            index = index.next()
+            dato = index.readDato()
+            for i in range(0,METADATA.cantidadColumnas):
+                print(dato.datos[i].ljust(METADATA.caracteres[i] if METADATA.caracteres[i] > LENGTH_TITULO else LENGTH_TITULO,PADDING),end="")
+            print("")
 
 
 
