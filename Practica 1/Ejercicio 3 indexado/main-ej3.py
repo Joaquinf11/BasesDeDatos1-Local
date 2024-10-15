@@ -1,5 +1,5 @@
-import ej3bitless
-from ej3bitless import *
+import ej3
+from ej3 import *
 
 
 def mostrarMenu():
@@ -22,25 +22,25 @@ def main():
     if accion == '0':
         return
     if accion == '1':
-            ej3bitless.ingresarNombreArchivo()
-            ej3bitless.generarArchivo()
+            ej3.ingresarNombreArchivo()
+            ej3.generarArchivo()
             print("Archivo generado exitosamente.")
     if accion == '2':
-        ej3bitless.ingresarNombreArchivo()
-        ej3bitless.readHead()
+        ej3.ingresarNombreArchivo()
+        ej3.readHead()
     
     mostrarMenu()
     accion= input("Ingrese una opcion: ")
     while(accion != '0'):
         if accion == '1':
            
-                ej3bitless.mostrarArchivo()
+                ej3.mostrarArchivo()
             
         elif accion == '2':
            
                 print("Ingrese los datos")
-                datos= ej3bitless.ingresarDatos()
-                ej3bitless.alta(datos)
+                datos= ej3.ingresarDatos()
+                ej3.alta(datos)
                 print("Alta generada exitosamente.")
             
                 
@@ -48,14 +48,14 @@ def main():
            
                 pk=input("Ingrese la pk que desea modificar: ")
                 print("Ingrese los datos")
-                datos= ej3bitless.ingresarDatos()
-                ej3bitless.update(pk, datos)
+                datos= ej3.ingresarDatos()
+                ej3.update(pk, datos)
                 print("Modificacion generada exitosamente.")
            
                 
         elif accion == '4':
                 pk=input("Ingrese la pk que desea eliminar: ")
-                ej3bitless.delete(pk)
+                ej3.delete(pk)
                 print("Registro eliminado exitosamente.")
     
         mostrarMenu()
